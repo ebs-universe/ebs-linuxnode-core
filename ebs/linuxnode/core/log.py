@@ -17,7 +17,7 @@ from .config import ConfigMixin
 from .basemixin import BaseMixin
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 class NodeLoggingMixin(ConfigMixin, BaseMixin):

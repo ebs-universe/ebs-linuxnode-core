@@ -114,9 +114,9 @@ class IoTNodeCoreConfig(object):
 
     def _config_init(self):
         _elements = {
-            'platform': ElementSpec('platform', 'platform'),
+            'platform': ElementSpec('platform', 'platform', ItemSpec(fallback='native')),
             'debug': ElementSpec('debug', 'debug', ItemSpec(bool, fallback=False)),
-            'node_id_getter': ElementSpec('id', 'getter', ItemSpec(fallback='uuid')),
+            'node_id_getter': ElementSpec('id', 'getter', ItemSpec(fallback='netifaces')),
             'node_id_interface': ElementSpec('id', 'interface', ItemSpec(fallback=None)),
             'node_id_override': ElementSpec('id', 'override', ItemSpec(fallback=None)),
         }
@@ -125,6 +125,10 @@ class IoTNodeCoreConfig(object):
             self.register_element(element, element_spec)
         self._apply_display_layer()
 
+    def print(self):
+        print("Node Configuration ({})".format(self.__class__.__name__))
+        for element in self._elements.keys():
+            print("{:20}: {}".format(element, getattr(self, element)))
     # Legacy Config, to be migrated.
 
     # Networks

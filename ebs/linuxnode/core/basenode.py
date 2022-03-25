@@ -21,12 +21,12 @@ class BaseIoTNode(ResourceManagerMixin,
 
     def install(self):
         super(BaseIoTNode, self).install()
-        self._log.info("Installing Node with ID {log_source.id}")
+        self.log.info("Installing Node with ID {id}", id=self.id)
 
     def start(self):
         super(BaseIoTNode, self).start()
-        self._log.info("Starting Node with ID {log_source.id}")
+        self.log.info("Starting Node with ID {id}", id=self.id)
 
     def stop(self):
         super(BaseIoTNode, self).stop()
-        self._log.info("Stopping Node with ID {log_source.id}")
+        self.log.info("Stopping Node with ID {id}", id=self.id)

@@ -5,11 +5,23 @@ from ebs.linuxnode.core.basenode import BaseIoTNode
 from ebs.linuxnode.core import config
 
 
+class ExampleNode(BaseIoTNode):
+    def start(self):
+        super(ExampleNode, self).start()
+        self.config.print()
+        reactor.callLater(10, self.stop)
+        reactor.run()
+
+    def stop(self):
+        super(ExampleNode, self).stop()
+        reactor.stop()
+
+
 def main():
     nodeconfig = config.IoTNodeCoreConfig()
     config.current_config = nodeconfig
 
-    node = BaseIoTNode(reactor)
+    node = ExampleNode(reactor=reactor)
     node.start()
 
 
