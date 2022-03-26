@@ -399,7 +399,7 @@ class IoTNodeCoreConfig(object):
 class ConfigMixin(object):
     def __init__(self, *args, **kwargs):
         global current_config
-        self._config = current_config
+        self._config: IoTNodeCoreConfig = current_config
         super(ConfigMixin, self).__init__(*args, **kwargs)
 
     @property
