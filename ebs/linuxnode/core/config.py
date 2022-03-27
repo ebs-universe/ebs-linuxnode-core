@@ -158,57 +158,6 @@ class IoTNodeConfig(object):
         if self.platform == 'rpi':
             return self._config.getint('video-rpi', 'dispmanx_video_layer', fallback=1)
 
-    # Browser
-    @property
-    def browser_show_default(self):
-        return self._config.getboolean('browser', 'show_default', fallback=False)
-
-    @browser_show_default.setter
-    def browser_show_default(self, value):
-        self._check_section('browser')
-        if value:
-            value = 'yes'
-        else:
-            value = 'no'
-        self._config.set('browser', 'show_default', value)
-        self._write_config()
-
-    @property
-    def browser_default_url(self):
-        return self._config.get('browser', 'default_url', fallback='http://www.google.com')
-
-    @browser_default_url.setter
-    def browser_default_url(self, value):
-        self._check_section('browser')
-        self._config.set('browser', 'default_url', value)
-        self._write_config()
-
-    # Fonts
-    @property
-    def text_font_name(self):
-        return self.get_path(self._config.get('text', 'font_name', fallback=None)
-                             )
-    @property
-    def text_use_fcm(self):
-        return self._config.getboolean('text', 'use_fcm', fallback=False)
-
-    @property
-    def text_fcm_system(self):
-        return self._config.getboolean('text', 'fcm_system', fallback=True)
-
-    @property
-    def text_fcm_fonts(self):
-        return self.get_path(self._config.get('text', 'fcm_fonts', fallback=None))
-
-    # Debug
-    @property
-    def gui_log_display(self):
-        return self._config.getboolean('debug', 'gui_log_display', fallback=False)
-
-    @property
-    def gui_log_level(self):
-        return self._config.get('debug', 'gui_log_level', fallback='info')
-
     # Display
     @property
     def fullscreen(self):
@@ -310,19 +259,6 @@ class IoTNodeConfig(object):
     def _apply_display_layer(self):
         if self.platform == 'rpi':
             os.environ.setdefault('KIVY_BCM_DISPMANX_LAYER', str(self.app_dispmanx_layer))
-
-    # ID
-    @property
-    def node_id_display(self):
-        return self._config.getboolean('id', 'display', fallback=False)
-
-    @property
-    def node_id_display_frequency(self):
-        return self._config.getint('id', 'display_frequency', fallback=0)
-
-    @property
-    def node_id_display_duration(self):
-        return self._config.getint('id', 'display_duration', fallback=15)
 
 
 class ConfigMixin(object):
