@@ -3,9 +3,10 @@
 from os import environ
 from twisted.internet.utils import getProcessOutput
 from ..basemixin import BaseMixin
+from ..config import ConfigMixin
 
 
-class BaseShellMixin(BaseMixin):
+class BaseShellMixin(ConfigMixin, BaseMixin):
     # def __init__(self, *args, **kwargs):
     #     self._shell_processes = {}
     #     super(BaseShellMixin, self).__init__(self, *args, **kwargs)

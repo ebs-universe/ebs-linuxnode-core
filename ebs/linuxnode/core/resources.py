@@ -21,6 +21,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from .http import HttpClientMixin
 from .http import _http_errors
+from .config import ElementSpec, ItemSpec
 
 from .constants import ASSET
 from .constants import CONTENT
@@ -500,6 +501,17 @@ class ResourceManagerMixin(HttpClientMixin):
         self._resource_manager = None
         self._resource_class = kwargs.pop('resource_class', CacheableResource)
         super(ResourceManagerMixin, self).__init__(*args, **kwargs)
+
+    def install(self):
+        super(ResourceManagerMixin, self).install()
+        _elements = {
+            'resource_prefetch_retries': ElementSpec('resources', 'prefetch_retries', ItemSpec(int, fallback=3)),
+            'resource_prefetch_retry_delay': ElementSpec('resources', 'prefetch_retry_delay', ItemSpec(int, fallback=5)),
+            'cache': ElementSpec('cache', 'max_size', ItemSpec(int, fallback=10000000))
+
+        }
+        for name, spec in _elements.items():
+            self.config.register_element(name, spec)
 
     @property
     def resource_manager(self):

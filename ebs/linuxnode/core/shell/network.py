@@ -2,6 +2,7 @@
 
 import ifcfg
 from twisted.internet.defer import succeed
+from ..config import ElementSpec, ItemSpec
 from . import BaseShellMixin
 
 
@@ -15,6 +16,16 @@ class WifiNetworkInfoMixin(BaseShellMixin):
 
 
 class NetworkInfoMixin(WifiNetworkInfoMixin):
+    def install(self):
+        super(NetworkInfoMixin, self).install()
+        _elements = {
+            'network_interface_wifi': ElementSpec('network', 'wifi', ItemSpec(fallback='wlan0')),
+            'network_interface_ethernet': ElementSpec('network', 'ethernet', ItemSpec(fallback='eth0')),
+            'network_interfaces': ElementSpec('_derived', self._network_interfaces)
+        }
+        for name, spec in _elements.items():
+            self.config.register_element(name, spec)
+
     @staticmethod
     def _network_check_interface(interface):
         if_spec = ifcfg.interfaces().get(interface, None)
@@ -32,6 +43,9 @@ class NetworkInfoMixin(WifiNetworkInfoMixin):
         if not if_spec:
             return
         return if_spec['inet']
+
+    def _network_interfaces(self, config):
+        return [config.network_interface_wifi, config.network_interface_ethernet]
 
     @property
     def network_interfaces(self):

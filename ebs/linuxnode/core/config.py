@@ -94,6 +94,8 @@ class IoTNodeConfig(object):
         kwargs = {}
         if not fallback == "_required":
             kwargs['fallback'] = fallback
+        if section == '_derived':
+            return item(self)
         if item_type == str:
             return self._config.get(section, item, **kwargs)
         elif item_type == bool:
@@ -123,9 +125,6 @@ class IoTNodeConfig(object):
         _elements = {
             'platform': ElementSpec('platform', 'platform', ItemSpec(fallback='native')),
             'debug': ElementSpec('debug', 'debug', ItemSpec(bool, fallback=False)),
-            'node_id_getter': ElementSpec('id', 'getter', ItemSpec(fallback='netifaces')),
-            'node_id_interface': ElementSpec('id', 'interface', ItemSpec(fallback=None)),
-            'node_id_override': ElementSpec('id', 'override', ItemSpec(fallback=None)),
         }
 
         for element, element_spec in _elements.items():
@@ -135,85 +134,8 @@ class IoTNodeConfig(object):
     def print(self):
         print("Node Configuration ({})".format(self.__class__.__name__))
         for element in self._elements.keys():
-            print("{:20}: {}".format(element, getattr(self, element)))
+            print("    {:>30}: {}".format(element, getattr(self, element)))
     # Legacy Config, to be migrated.
-
-    # Networks
-    @property
-    def network_interface_wifi(self):
-        return self._config.get('network', 'wifi', fallback='wlan0')
-
-    @property
-    def network_interface_ethernet(self):
-        return self._config.get('network', 'ethernet', fallback='eth0')
-
-    @property
-    def network_interfaces(self):
-        return [self.network_interface_wifi, self.network_interface_ethernet]
-
-    # HTTP
-    @property
-    def http_max_concurrent_requests(self):
-        return self._config.getint('http', 'max_concurrent_requests', fallback=1)
-
-    @property
-    def http_max_background_downloads(self):
-        return self._config.getint('http', 'max_background_downloads', fallback=1)
-
-    @property
-    def http_max_concurrent_downloads(self):
-        return self._config.getint('http', 'max_concurrent_downloads', fallback=1)
-
-    @property
-    def http_proxy_host(self):
-        return self._config.get('NetworkProxyConfiguration', 'host', fallback=None)
-
-    @property
-    def http_proxy_port(self):
-        return self._config.getint('NetworkProxyConfiguration', 'port', fallback=0)
-
-    @property
-    def http_proxy_user(self):
-        return self._config.get('NetworkProxyConfiguration', 'user', fallback=None)
-
-    @property
-    def http_proxy_pass(self):
-        return self._config.get('NetworkProxyConfiguration', 'pass', fallback=None)
-
-    @property
-    def http_proxy_enabled(self):
-        return self.http_proxy_host is not None
-
-    @property
-    def http_proxy_auth(self):
-        if not self.http_proxy_user:
-            return None
-        if not self.http_proxy_pass:
-            return self.http_proxy_user
-        return "{0}:{1}".format(self.http_proxy_user, self.http_proxy_pass)
-
-    @property
-    def http_proxy_url(self):
-        url = self.http_proxy_host
-        if self.http_proxy_port:
-            url = "{0}:{1}".format(url, self.http_proxy_port)
-        if self.http_proxy_auth:
-            url = "{0}@{1}".format(self.http_proxy_auth, url)
-        return url
-
-    # Resource Manager
-    @property
-    def resource_prefetch_retries(self):
-        return self._config.getint('resources', 'prefetch_retries', fallback=3)
-
-    @property
-    def resource_prefetch_retry_delay(self):
-        return self._config.getint('resources', 'prefetch_retry_delay', fallback=5)
-
-    # Cache
-    @property
-    def cache_max_size(self):
-        return self._config.getint('cache', 'max_size', fallback='10000000')
 
     # Video
     @property

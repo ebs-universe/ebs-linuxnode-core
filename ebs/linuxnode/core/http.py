@@ -29,6 +29,7 @@ from twisted.web.client import ResponseFailed
 from twisted.web.error import SchemeNotSupported
 
 from .shell.network import NetworkInfoMixin
+from .config import ElementSpec, ItemSpec
 
 
 class HTTPError(Exception):
@@ -120,6 +121,42 @@ class HttpClientMixin(NetworkInfoMixin, NodeBusyMixin,
         self._http_semaphore_background = None
         self._http_semaphore_download = None
         super(HttpClientMixin, self).__init__(*args, **kwargs)
+
+    def install(self):
+        super(HttpClientMixin, self).install()
+        _elements = {
+            'http_max_concurrent_requests': ElementSpec('http', 'max_concurrent_requests', ItemSpec(int, fallback=1)),
+            'http_max_background_downloads': ElementSpec('http', 'max_background_downloads', ItemSpec(int, fallback=1)),
+            'http_max_concurrent_downloads': ElementSpec('http', 'max_concurrent_downloads', ItemSpec(int, fallback=1)),
+            'http_proxy_host': ElementSpec('http', 'proxy_host', ItemSpec(fallback=None)),
+            'http_proxy_port': ElementSpec('http', 'proxy_port', ItemSpec(int, fallback=0)),
+            'http_proxy_user': ElementSpec('http', 'proxy_user', ItemSpec(fallback=None)),
+            'http_proxy_pass': ElementSpec('http', 'proxy_pass', ItemSpec(fallback=None)),
+            'http_proxy_enabled': ElementSpec('_derived', self._http_proxy_enabled),
+            'http_proxy_auth': ElementSpec('_derived', self._http_proxy_auth),
+            'http_proxy_url': ElementSpec('_derived', self._http_proxy_url),
+
+        }
+        for name, spec in _elements.items():
+            self.config.register_element(name, spec)
+
+    def _http_proxy_enabled(self, config):
+        return config.http_proxy_host is not None
+
+    def _http_proxy_auth(self, config):
+        if not config.http_proxy_user:
+            return None
+        if not config.http_proxy_pass:
+            return config.http_proxy_user
+        return "{0}:{1}".format(config.http_proxy_user, config.http_proxy_pass)
+
+    def _http_proxy_url(self, config):
+        url = config.http_proxy_host
+        if config.http_proxy_port:
+            url = "{0}:{1}".format(url, config.http_proxy_port)
+        if config.http_proxy_auth:
+            url = "{0}@{1}".format(config.http_proxy_auth, url)
+        return url
 
     def http_get(self, url, **kwargs):
         self.log.debug("Executing HTTP GET Request\n"

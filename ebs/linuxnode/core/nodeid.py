@@ -5,6 +5,7 @@ import netifaces
 
 from .basemixin import BaseMixin
 from .config import ConfigMixin
+from .config import ElementSpec, ItemSpec
 
 
 class NodeIDMixin(ConfigMixin, BaseMixin):
@@ -13,6 +14,16 @@ class NodeIDMixin(ConfigMixin, BaseMixin):
     def __init__(self, *args, **kwargs):
         super(NodeIDMixin, self).__init__(*args, **kwargs)
         self._id = None
+
+    def install(self):
+        super(NodeIDMixin, self).install()
+        _elements = {
+            'node_id_getter': ElementSpec('id', 'getter', ItemSpec(fallback='netifaces')),
+            'node_id_interface': ElementSpec('id', 'interface', ItemSpec(fallback=None)),
+            'node_id_override': ElementSpec('id', 'override', ItemSpec(fallback=None)),
+        }
+        for name, spec in _elements.items():
+            self.config.register_element(name, spec)
 
     @property
     def id(self):
