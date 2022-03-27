@@ -9,20 +9,12 @@ from twisted.internet import reactor
 
 
 class BaseMixin(object):
-    _appname = 'iotnode'
-    _app_root = os.path.abspath(os.path.dirname(__file__))
-    _app_resources = os.path.join(_app_root, 'resources')
-
     def __init__(self, *args, **kwargs):
         self._reactor = kwargs.pop('reactor', reactor)
         self._cache_dir = None
         self._db_dir = None
         self._temp_dir = None
         super(BaseMixin, self).__init__(*args, **kwargs)
-
-    @property
-    def app_resources(self):
-        return self._app_resources
 
     def install(self):
         pass
@@ -45,7 +37,7 @@ class BaseMixin(object):
 
     @property
     def appname(self):
-        return self._appname
+        return self.config.appname
 
     @property
     def cache_dir(self):

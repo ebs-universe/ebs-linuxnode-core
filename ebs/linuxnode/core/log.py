@@ -27,7 +27,7 @@ class NodeLoggingMixin(ConfigMixin, BaseMixin):
         super(NodeLoggingMixin, self).__init__(*args, **kwargs)
         self._log_file = None
         self.log_prune()
-        self._log = logger.Logger(namespace=self._appname,
+        self._log = logger.Logger(namespace=self.appname,
                                   source=self)
         self.reactor.callWhenRunning(self._start_logging)
 
@@ -89,5 +89,5 @@ class NodeLoggingMixin(ConfigMixin, BaseMixin):
 
     @property
     def log_dir(self):
-        os.makedirs(user_log_dir(self._appname), exist_ok=True)
-        return user_log_dir(self._appname)
+        os.makedirs(user_log_dir(self.appname), exist_ok=True)
+        return user_log_dir(self.appname)

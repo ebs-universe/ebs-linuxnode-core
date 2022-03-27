@@ -18,24 +18,36 @@ ItemSpec = namedtuple('ItemSpec', ["item_type", "fallback", "read_only"], defaul
 ElementSpec = namedtuple('ElementSpec', ['section', 'item', 'item_spec'], defaults=[ItemSpec()])
 
 
-class IoTNodeCoreConfig(object):
-    _appname = 'iotnode'
-    _root = os.path.abspath(os.path.dirname(__file__))
-    _roots = [_root]
-    _config_file = os.path.join(user_config_dir(_appname), 'config.ini')
-
-    def __init__(self):
+class IoTNodeConfig(object):
+    def __init__(self, appname=None, packagename=None):
         self._elements = {}
+        self._packagename = packagename
+        self._appname = appname or 'iotnode'
+        _root = os.path.abspath(os.path.dirname(__file__))
+        self._roots = [_root]
         self._config = ConfigParser()
         print("Reading Config File {}".format(self._config_file))
         self._config.read(self._config_file)
-        self._sys_config = ConfigParser()
         print("EBS IOT Linux Node Core, version {0}".format(self.linuxnode_core_version))
         self._config_init()
 
     @property
+    def appname(self):
+        return self._appname
+
+    @property
+    def _config_file(self):
+        return os.path.join(user_config_dir(self.appname), 'config.ini')
+
+    @property
     def linuxnode_core_version(self):
         return pkg_resources.get_distribution('ebs-linuxnode-core').version
+
+    @property
+    def app_version(self):
+        if not self._packagename:
+            return
+        return pkg_resources.get_distribution(self._packagename).version
 
     def _write_config(self):
         with open(self._config_file, 'w') as configfile:
@@ -58,22 +70,17 @@ class IoTNodeCoreConfig(object):
 
     # Paths
     @property
-    def app_root(self):
-        return self._root
-
-    @property
-    def app_resources(self):
-        return os.path.join(self.app_root, 'resources')
-
-    @property
     def roots(self):
-        return self._roots
+        return list(reversed(self._roots))
 
     def get_path(self, filepath):
-        for root in self._roots:
+        for root in self.roots:
             if os.path.exists(os.path.join(root, filepath)):
                 return os.path.join(root, filepath)
         return filepath
+
+    def register_application_root(self, root):
+        self._roots.append(root)
 
     # Modular Config Infrastructure
     def register_element(self, name, element_spec):
@@ -98,7 +105,7 @@ class IoTNodeCoreConfig(object):
 
     def __setattr__(self, element, value):
         if element == '_elements' or element not in self._elements.keys():
-            return super(IoTNodeCoreConfig, self).__setattr__(element, value)
+            return super(IoTNodeConfig, self).__setattr__(element, value)
         section, item, item_spec = self._elements[element]
         item_type, fallback, read_only = item_spec
 
@@ -159,19 +166,19 @@ class IoTNodeCoreConfig(object):
 
     @property
     def http_proxy_host(self):
-        return self._sys_config.get('NetworkProxyConfiguration', 'host', fallback=None)
+        return self._config.get('NetworkProxyConfiguration', 'host', fallback=None)
 
     @property
     def http_proxy_port(self):
-        return self._sys_config.getint('NetworkProxyConfiguration', 'port', fallback=0)
+        return self._config.getint('NetworkProxyConfiguration', 'port', fallback=0)
 
     @property
     def http_proxy_user(self):
-        return self._sys_config.get('NetworkProxyConfiguration', 'user', fallback=None)
+        return self._config.get('NetworkProxyConfiguration', 'user', fallback=None)
 
     @property
     def http_proxy_pass(self):
-        return self._sys_config.get('NetworkProxyConfiguration', 'pass', fallback=None)
+        return self._config.get('NetworkProxyConfiguration', 'pass', fallback=None)
 
     @property
     def http_proxy_enabled(self):
@@ -399,7 +406,7 @@ class IoTNodeCoreConfig(object):
 class ConfigMixin(object):
     def __init__(self, *args, **kwargs):
         global current_config
-        self._config: IoTNodeCoreConfig = current_config
+        self._config: IoTNodeConfig = current_config
         super(ConfigMixin, self).__init__(*args, **kwargs)
 
     @property
