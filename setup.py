@@ -17,20 +17,16 @@ _requires = [
 
     # HTTP Client
     'treq',
-
-    # Event Manager
-    'cached_property',
-    'pqueue',
 ]
 
 setuptools.setup(
     name='ebs-linuxnode-core',
-    url='',
+    url='https://github.com/ebs-universe/ebs-linuxnode-core',
 
     author='Chintalagiri Shashank',
     author_email='shashank.chintalagiri@gmail.com',
 
-    description='',
+    description='Twisted based linux application node core',
     long_description='',
 
     packages=setuptools.find_packages(),
