@@ -13,6 +13,7 @@ from twisted.logger import textFileLogObserver
 from appdirs import user_log_dir
 from datetime import datetime
 
+from .config import ElementSpec, ItemSpec
 from .config import ConfigMixin
 from .basemixin import BaseMixin
 
@@ -30,6 +31,15 @@ class NodeLoggingMixin(ConfigMixin, BaseMixin):
         self._log = logger.Logger(namespace=self.appname,
                                   source=self)
         self.reactor.callWhenRunning(self._start_logging)
+
+    def install(self):
+        super(NodeLoggingMixin, self).install()
+        _elements = {
+            'debug': ElementSpec('debug', 'debug', ItemSpec(bool, fallback=False)),
+        }
+
+        for element, element_spec in _elements.items():
+            self.config.register_element(element, element_spec)
 
     def _observers(self):
         if self.config.debug:

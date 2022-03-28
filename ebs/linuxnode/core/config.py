@@ -104,6 +104,8 @@ class IoTNodeConfig(object):
             return self._config.getint(section, item, **kwargs)
         elif item_type == float:
             return self._config.getfloat(section, item, **kwargs)
+        elif item_type == 'kivy_color':
+            return self._parse_color(self._config.get(section, item, **kwargs))
 
     def __setattr__(self, element, value):
         if element == '_elements' or element not in self._elements.keys():
@@ -124,141 +126,15 @@ class IoTNodeConfig(object):
     def _config_init(self):
         _elements = {
             'platform': ElementSpec('platform', 'platform', ItemSpec(fallback='native')),
-            'debug': ElementSpec('debug', 'debug', ItemSpec(bool, fallback=False)),
         }
 
         for element, element_spec in _elements.items():
             self.register_element(element, element_spec)
-        self._apply_display_layer()
 
     def print(self):
         print("Node Configuration ({})".format(self.__class__.__name__))
         for element in self._elements.keys():
             print("    {:>30}: {}".format(element, getattr(self, element)))
-    # Legacy Config, to be migrated.
-
-    # Video
-    @property
-    def video_external_player(self):
-        if self.platform == 'rpi':
-            return self._config.getboolean('video-rpi', 'external_player', fallback=False)
-
-    @property
-    def video_dispmanx_layer(self):
-        if self.platform == 'rpi':
-            return self._config.getint('video-rpi', 'dispmanx_video_layer', fallback=4)
-
-    @property
-    def video_show_backdrop(self):
-        if self.platform == 'rpi':
-            return self._config.getboolean('video-rpi', 'show_backdrop', fallback=False)
-
-    @property
-    def video_backdrop_dispmanx_layer(self):
-        if self.platform == 'rpi':
-            return self._config.getint('video-rpi', 'dispmanx_video_layer', fallback=1)
-
-    # Display
-    @property
-    def fullscreen(self):
-        return self._config.getboolean('display', 'fullscreen', fallback=True)
-
-    @property
-    def portrait(self):
-        return self._config.getboolean('display', 'portrait', fallback=False)
-
-    @portrait.setter
-    def portrait(self, value):
-        self._check_section('display')
-        self._config.set('display', 'portrait', "yes" if value else "no")
-        self._write_config()
-
-    @property
-    def flip(self):
-        return self._config.getboolean('display', 'flip', fallback=False)
-
-    @flip.setter
-    def flip(self, value):
-        self._check_section('display')
-        self._config.set('display', 'flip', "yes" if value else "no")
-        self._write_config()
-
-    @property
-    def orientation(self):
-        rv = 0
-        if self.portrait is True:
-            rv += 90
-        if self.flip:
-            rv += 180
-        return rv
-
-    @property
-    def os_rotation(self):
-        return self._config.getboolean('display', 'os_rotation', fallback=False)
-
-    def orientation_update(self):
-        from kivy.config import Config
-        Config.set('graphics', 'rotation', self.orientation)
-
-    @property
-    def overlay_mode(self):
-        return self._config.getboolean('display', 'overlay_mode', fallback=False)
-
-    @property
-    def sidebar_width(self):
-        return self._config.getfloat('display', 'sidebar_width', fallback=0.3)
-
-    @property
-    def sidebar_height(self):
-        rv = self._config.getfloat('display', 'sidebar_height', fallback=0.0)
-        if not rv:
-            rv = self.sidebar_width
-        return rv
-
-    @property
-    def show_foundation(self):
-        return self._config.getboolean('display-rpi', 'show_foundation', fallback=True)
-
-    @property
-    def dispmanx_foundation_layer(self):
-        return self._config.getint('display-rpi', 'dispmanx_foundation_layer', fallback=1)
-
-    @property
-    def foundation_image(self):
-        return self._config.get('display-rpi', 'foundation_image', fallback=None)
-
-    @property
-    def image_bgcolor(self):
-        return self._parse_color(self._config.get('display', 'image_bgcolor', fallback='auto'))
-
-    @property
-    def background(self):
-        return self._config.get('display', 'background', fallback='images/background.png')
-
-    @background.setter
-    def background(self, value):
-        self._check_section('display')
-        self._config.set('display', 'background', value)
-        self._write_config()
-
-    @property
-    def background_external_player(self):
-        if self.platform == 'rpi':
-            return self._config.getboolean('display-rpi', 'background_external_player', fallback=False)
-
-    @property
-    def background_dispmanx_layer(self):
-        return self._config.getint('display-rpi', 'background_dispmanx_layer', fallback=2)
-
-    @property
-    def app_dispmanx_layer(self):
-        if self.platform != 'rpi':
-            raise AttributeError("dispmanx layer is an RPI thing")
-        return self._config.getint('display-rpi', 'dispmanx_app_layer', fallback=5)
-
-    def _apply_display_layer(self):
-        if self.platform == 'rpi':
-            os.environ.setdefault('KIVY_BCM_DISPMANX_LAYER', str(self.app_dispmanx_layer))
 
 
 class ConfigMixin(object):
