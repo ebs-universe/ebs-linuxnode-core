@@ -7,6 +7,7 @@ from ebs.linuxnode.core import config
 
 class ExampleNode(BaseIoTNode):
     def start(self):
+        self.install()
         super(ExampleNode, self).start()
         self.config.print()
         reactor.callLater(10, self.stop)
