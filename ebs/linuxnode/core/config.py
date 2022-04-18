@@ -74,6 +74,8 @@ class IoTNodeConfig(object):
         return list(reversed(self._roots))
 
     def get_path(self, filepath):
+        if not filepath:
+            return filepath
         for root in self.roots:
             if os.path.exists(os.path.join(root, filepath)):
                 return os.path.join(root, filepath)
@@ -106,6 +108,8 @@ class IoTNodeConfig(object):
             return self._config.getfloat(section, item, **kwargs)
         elif item_type == 'kivy_color':
             return self._parse_color(self._config.get(section, item, **kwargs))
+        elif item_type == 'path':
+            return self.get_path(self._config.get(section, item, **kwargs))
 
     def __setattr__(self, element, value):
         if element == '_elements' or element not in self._elements.keys():

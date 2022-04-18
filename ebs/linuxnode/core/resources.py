@@ -505,9 +505,9 @@ class ResourceManagerMixin(HttpClientMixin):
     def install(self):
         super(ResourceManagerMixin, self).install()
         _elements = {
-            'resource_prefetch_retries': ElementSpec('resources', 'prefetch_retries', ItemSpec(int, fallback=3)),
-            'resource_prefetch_retry_delay': ElementSpec('resources', 'prefetch_retry_delay', ItemSpec(int, fallback=5)),
-            'cache': ElementSpec('cache', 'max_size', ItemSpec(int, fallback=10000000))
+            'resource_prefetch_retries': ElementSpec('resources', 'prefetch_retries', ItemSpec(int, fallback=6)),
+            'resource_prefetch_retry_delay': ElementSpec('resources', 'prefetch_retry_delay', ItemSpec(int, fallback=60)),
+            'cache_max_size': ElementSpec('cache', 'max_size', ItemSpec(int, fallback=100000000))
 
         }
         for name, spec in _elements.items():
