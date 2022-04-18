@@ -1,5 +1,8 @@
 
 
+import os
+import appdirs
+
 from .nodeid import NodeIDMixin
 from .log import NodeLoggingMixin
 from .busy import NodeBusyMixin
@@ -22,6 +25,7 @@ class BaseIoTNode(ResourceManagerMixin,
     def install(self):
         super(BaseIoTNode, self).install()
         self.log.info("Installing Node with ID {id}", id=self.id)
+        os.makedirs(appdirs.user_config_dir(self.config.appname), exist_ok=True)
 
     def start(self):
         super(BaseIoTNode, self).start()
