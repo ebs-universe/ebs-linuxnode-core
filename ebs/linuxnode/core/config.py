@@ -123,6 +123,9 @@ class IoTNodeConfig(object):
         if item_type == bool:
             value = "yes" if value else "no"
 
+        if not value:
+            value = ''
+
         self._check_section(section)
         self._config.set(section, item, value)
         self._write_config()
