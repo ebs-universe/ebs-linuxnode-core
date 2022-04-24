@@ -28,7 +28,6 @@ from twisted.web.client import ResponseNeverReceived
 from twisted.web.client import ResponseFailed
 from twisted.web.error import SchemeNotSupported
 
-from .shell.network import NetworkInfoMixin
 from .config import ElementSpec, ItemSpec
 
 
@@ -112,8 +111,7 @@ def watchful_collect(response, collector, chunktimeout=None, reactor=None):
     return d
 
 
-class HttpClientMixin(NetworkInfoMixin, NodeBusyMixin,
-                      NodeLoggingMixin, BaseMixin):
+class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
     def __init__(self, *args, **kwargs):
         self._http_headers = {}
         self._http_client = None

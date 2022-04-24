@@ -2,8 +2,8 @@
 
 from os import environ
 from twisted.internet.utils import getProcessOutput
-from ..basemixin import BaseMixin
-from ..config import ConfigMixin
+from .basemixin import BaseMixin
+from .config import ConfigMixin
 
 
 class BaseShellMixin(ConfigMixin, BaseMixin):
