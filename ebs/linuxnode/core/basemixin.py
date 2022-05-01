@@ -59,3 +59,7 @@ class BaseMixin(object):
             self._temp_dir = tempfile.mkdtemp()
             atexit.register(shutil.rmtree, self._temp_dir)
         return self._temp_dir
+
+    def sysinfo_install(self):
+        self.sysinfo.app.versions.register_namespace('ebs')
+        self.sysinfo.app.versions.register_namespace('tendril')
