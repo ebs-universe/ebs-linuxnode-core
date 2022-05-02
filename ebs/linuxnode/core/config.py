@@ -12,6 +12,7 @@ import pkg_resources
 from six.moves.configparser import ConfigParser
 from collections import namedtuple
 from appdirs import user_config_dir
+from configparser import NoSectionError
 
 
 ItemSpec = namedtuple('ItemSpec', ["item_type", "fallback", "read_only"], defaults=[str, '_required', True])
@@ -129,6 +130,15 @@ class IoTNodeConfig(object):
         self._check_section(section)
         self._config.set(section, item, value)
         self._write_config()
+
+    def remove(self, element):
+        section, item, item_spec = self._elements[element]
+        if item_spec.read_only:
+            return False
+        try:
+            return self._config.remove_option(section, item)
+        except NoSectionError:
+            pass
 
     def _config_init(self):
         _elements = {
