@@ -9,9 +9,11 @@ from .busy import NodeBusyMixin
 from .shell import BaseShellMixin
 from .http import HttpClientMixin
 from .resources import ResourceManagerMixin
+from .background import BackgroundCoreMixin
 
 
-class BaseIoTNode(ResourceManagerMixin,
+class BaseIoTNode(BackgroundCoreMixin,
+                  ResourceManagerMixin,
                   HttpClientMixin,
                   BaseShellMixin,
                   NodeBusyMixin,
