@@ -2,6 +2,7 @@
 
 import os
 import time
+import psutil
 from datetime import datetime
 from datetime import timedelta
 from functools import partial
@@ -504,11 +505,11 @@ class ResourceManagerMixin(HttpClientMixin):
 
     def install(self):
         super(ResourceManagerMixin, self).install()
+        _default_cache_size = int((psutil.disk_usage('/').total - 5000000000) * 0.7)
         _elements = {
             'resource_prefetch_retries': ElementSpec('resources', 'prefetch_retries', ItemSpec(int, fallback=6)),
             'resource_prefetch_retry_delay': ElementSpec('resources', 'prefetch_retry_delay', ItemSpec(int, fallback=60)),
-            'cache_max_size': ElementSpec('cache', 'max_size', ItemSpec(int, fallback=100000000))
-
+            'cache_max_size': ElementSpec('cache', 'max_size', ItemSpec(int, fallback=_default_cache_size))
         }
         for name, spec in _elements.items():
             self.config.register_element(name, spec)

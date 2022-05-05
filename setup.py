@@ -14,6 +14,7 @@ _requires = [
 
     # System
     'ifcfg',
+    'psutil',
 
     # HTTP Client
     'treq',
