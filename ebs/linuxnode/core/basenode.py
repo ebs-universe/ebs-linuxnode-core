@@ -34,3 +34,6 @@ class BaseIoTNode(ResourceManagerMixin,
     def stop(self):
         super(BaseIoTNode, self).stop()
         self.log.info("Stopping Node with ID {id}", id=self.id)
+
+    def exit(self):
+        self.stop()

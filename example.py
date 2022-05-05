@@ -19,7 +19,7 @@ class ExampleNode(BaseIoTNode):
 
 
 def main():
-    nodeconfig = config.IoTNodeCoreConfig()
+    nodeconfig = config.IoTNodeConfig('iotnode-bare')
     config.current_config = nodeconfig
 
     node = ExampleNode(reactor=reactor)
