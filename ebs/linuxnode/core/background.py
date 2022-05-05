@@ -1,10 +1,13 @@
 
 
+import os
 import time
 from collections import namedtuple
+from six.moves.urllib.parse import urlparse
 
 from ebs.linuxnode.core.basemixin import BaseMixin
 from ebs.linuxnode.core.log import NodeLoggingMixin
+from ebs.linuxnode.core.resources import ResourceManagerMixin
 from ebs.linuxnode.core.config import ElementSpec, ItemSpec
 
 
@@ -75,7 +78,7 @@ class BackgroundProviderBase(object):
             self._eresidual = None
 
 
-class BackgroundCoreMixin(NodeLoggingMixin, BaseMixin):
+class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
     def __init__(self, *args, **kwargs):
         super(BackgroundCoreMixin, self).__init__(*args, **kwargs)
         self._bg_providers = []
@@ -126,9 +129,6 @@ class BackgroundCoreMixin(NodeLoggingMixin, BaseMixin):
             self.config.background = target
 
         self.bg_update()
-
-    def bg_update(self):
-        pass
 
     def bg_clear(self):
         self._bg = None
