@@ -147,7 +147,7 @@ class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
             value, bgcolor, callback, duration = value
 
         if self._bg_current == value and not callback and not duration:
-            return
+            return False
 
         if not bgcolor:
             try:
@@ -177,6 +177,8 @@ class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
         self._bg = self._bg_current_provider.play(
             value, bgcolor=bgcolor, callback=callback, duration=duration
         )
+
+        return True
 
     def bg_pause(self):
         self.log.debug("Pausing Background")
