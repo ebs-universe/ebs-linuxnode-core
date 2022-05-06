@@ -5,6 +5,7 @@ import atexit
 import shutil
 import tempfile
 from appdirs import user_cache_dir
+from appdirs import user_config_dir
 from twisted.internet import reactor
 
 
@@ -12,6 +13,7 @@ class BaseMixin(object):
     def __init__(self, *args, **kwargs):
         self._reactor = kwargs.pop('reactor', reactor)
         self._cache_dir = None
+        self._config_dir = None
         self._db_dir = None
         self._temp_dir = None
         super(BaseMixin, self).__init__(*args, **kwargs)
@@ -38,6 +40,13 @@ class BaseMixin(object):
     @property
     def appname(self):
         return self.config.appname
+
+    @property
+    def config_dir(self):
+        if not self._config_dir:
+            self._config_dir = user_config_dir(self.appname)
+            os.makedirs(self._config_dir, exist_ok=True)
+        return self._config_dir
 
     @property
     def cache_dir(self):
