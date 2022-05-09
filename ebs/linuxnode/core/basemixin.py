@@ -72,3 +72,6 @@ class BaseMixin(object):
     def sysinfo_install(self):
         self.sysinfo.app.versions.register_namespace('ebs')
         self.sysinfo.app.versions.register_namespace('tendril')
+
+    def exim_install(self):
+        self.exim.register_export('logs', '/var/log/ebs')

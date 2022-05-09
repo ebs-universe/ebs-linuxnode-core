@@ -101,3 +101,7 @@ class NodeLoggingMixin(ConfigMixin, BaseMixin):
     def log_dir(self):
         os.makedirs(user_log_dir(self.appname), exist_ok=True)
         return user_log_dir(self.appname)
+
+    def exim_install(self):
+        super(NodeLoggingMixin, self).exim_install()
+        self.exim.register_export('logs', self.log_dir)
