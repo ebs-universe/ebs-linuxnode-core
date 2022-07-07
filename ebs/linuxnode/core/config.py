@@ -95,6 +95,8 @@ class IoTNodeConfig(object):
         section, item, item_spec = self._elements[element]
         item_type, fallback, read_only = item_spec
         kwargs = {}
+        if callable(fallback):
+            fallback = fallback(self)
         if not fallback == "_required":
             kwargs['fallback'] = fallback
         if section == '_derived':
