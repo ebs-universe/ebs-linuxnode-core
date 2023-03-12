@@ -28,6 +28,12 @@ from twisted.web.client import ResponseNeverReceived
 from twisted.web.client import ResponseFailed
 from twisted.web.error import SchemeNotSupported
 
+from twisted.web.iweb import IPolicyForHTTPS
+from twisted.web.client import BrowserLikePolicyForHTTPS
+from twisted.internet import ssl
+
+from zope.interface import implementer
+
 from .config import ElementSpec, ItemSpec
 
 
@@ -111,6 +117,19 @@ def watchful_collect(response, collector, chunktimeout=None, reactor=None):
     return d
 
 
+@implementer(IPolicyForHTTPS)
+class WhitelistNoVerifyContextFactory(object):
+    _browserPolicy = BrowserLikePolicyForHTTPS()
+
+    def __init__(self, whitelist):
+        self._whitelist = whitelist
+
+    def creatorForNetloc(self, hostname, port):
+        if (hostname, port) in self._whitelist:
+            return ssl.CertificateOptions(verify=False)
+        return self._browserPolicy.creatorForNetloc(hostname, port)
+
+
 class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
     def __init__(self, *args, **kwargs):
         self._http_headers = {}
@@ -133,7 +152,7 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
             'http_proxy_enabled': ElementSpec('_derived', self._http_proxy_enabled),
             'http_proxy_auth': ElementSpec('_derived', self._http_proxy_auth),
             'http_proxy_url': ElementSpec('_derived', self._http_proxy_url),
-
+            'http_disable_ssl_verification': ElementSpec('http', 'disable_ssl_verification', ItemSpec(str, fallback=None)),
         }
         for name, spec in _elements.items():
             self.config.register_element(name, spec)
@@ -356,6 +375,11 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
                 if self.config.http_proxy_user:
                     auth = base64.b64encode(self.config.http_proxy_auth)
                     self._http_headers['Proxy-Authorization'] = ["Basic {0}".format(auth.strip())]
+            elif self.config.http_disable_ssl_verification:
+                host, port = self.config.http_disable_ssl_verification.split(':')
+                self.log.warn(f"Disabling SSL verification for https://{host}:{port}")
+                agent = Agent(reactor=self.reactor,
+                              contextFactory=WhitelistNoVerifyContextFactory([(host.encode(), int(port))]))
             else:
                 agent = Agent(reactor=self.reactor)
             self._http_client = DefaultHeadersHttpClient(agent=agent, headers=self._http_headers)
