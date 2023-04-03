@@ -376,7 +376,11 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
                     auth = base64.b64encode(self.config.http_proxy_auth)
                     self._http_headers['Proxy-Authorization'] = ["Basic {0}".format(auth.strip())]
             elif self.config.http_disable_ssl_verification:
-                host, port = self.config.http_disable_ssl_verification.split(':')
+                try:
+                    host, port = self.config.http_disable_ssl_verification.split(':')
+                except ValueError:
+                    host = self.config.http_disable_ssl_verification
+                    port = 443
                 self.log.warn(f"Disabling SSL verification for https://{host}:{port}")
                 agent = Agent(reactor=self.reactor,
                               contextFactory=WhitelistNoVerifyContextFactory([(host.encode(), int(port))]))
