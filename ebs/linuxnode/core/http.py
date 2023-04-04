@@ -1,6 +1,7 @@
 
 
 import os
+import copy
 import base64
 
 from functools import partial
@@ -146,7 +147,7 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
             'http_max_background_downloads': ElementSpec('http', 'max_background_downloads', ItemSpec(int, fallback=1)),
             'http_max_concurrent_downloads': ElementSpec('http', 'max_concurrent_downloads', ItemSpec(int, fallback=1)),
             'http_proxy_host': ElementSpec('http', 'proxy_host', ItemSpec(fallback=None)),
-            'http_proxy_port': ElementSpec('http', 'proxy_port', ItemSpec(int, fallback=0)),
+            'http_proxy_port': ElementSpec('http', 'proxy_port', ItemSpec(int, fallback=0, masked=True)),
             'http_proxy_user': ElementSpec('http', 'proxy_user', ItemSpec(fallback=None)),
             'http_proxy_pass': ElementSpec('http', 'proxy_pass', ItemSpec(fallback=None)),
             'http_proxy_enabled': ElementSpec('_derived', self._http_proxy_enabled),
@@ -175,11 +176,21 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
             url = "{0}@{1}".format(config.http_proxy_auth, url)
         return url
 
+    @staticmethod
+    def _strip_auth(kwargs):
+        if 'headers' not in kwargs.keys():
+            return kwargs
+        if b'Authorization' in kwargs['headers'].keys():
+            rv = copy.deepcopy(kwargs)
+            rv['headers'][b'Authorization'] = rv['headers'][b'Authorization'][:10] + b'...'
+            return rv
+        return kwargs
+
     def http_get(self, url, **kwargs):
         self.log.debug("Executing HTTP GET Request\n"
                        " to URL {url}\n"
                        " with kwargs {kwargs}",
-                       url=url, kwargs=kwargs)
+                       url=url, kwargs=self._strip_auth(kwargs))
         deferred_response = self.http_semaphore.run(
             self.http_client.get, url, **kwargs
         )
@@ -196,7 +207,7 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
         self.log.debug("Executing HTTP Post Request\n"
                        " to URL {url}\n"
                        " with kwargs {kwargs}",
-                       url=url, kwargs=kwargs)
+                       url=url, kwargs=self._strip_auth(kwargs))
         deferred_response = self.http_semaphore.run(
             self.http_client.post, url, **kwargs
         )

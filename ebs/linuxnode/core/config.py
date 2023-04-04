@@ -15,7 +15,8 @@ from appdirs import user_config_dir
 from configparser import NoSectionError
 
 
-ItemSpec = namedtuple('ItemSpec', ["item_type", "fallback", "read_only"], defaults=[str, '_required', True])
+ItemSpec = namedtuple('ItemSpec', ["item_type", "fallback", "read_only", "masked"],
+                      defaults=[str, '_required', True, False])
 ElementSpec = namedtuple('ElementSpec', ['section', 'item', 'item_spec'], defaults=[ItemSpec()])
 
 
@@ -93,7 +94,7 @@ class IoTNodeConfig(object):
         if element not in self._elements.keys():
             raise AttributeError(element)
         section, item, item_spec = self._elements[element]
-        item_type, fallback, read_only = item_spec
+        item_type, fallback, read_only, masked = item_spec
         kwargs = {}
         if callable(fallback):
             fallback = fallback(self)
@@ -150,10 +151,22 @@ class IoTNodeConfig(object):
         for element, element_spec in _elements.items():
             self.register_element(element, element_spec)
 
+    @staticmethod
+    def mask_value(pv):
+        v_len = len(pv)
+        m_len = int(min(v_len / 8, 8))
+        return f"{pv[:m_len]}...{pv[-m_len:]}"
+
+    def scrubbed_value(self, key):
+        pv = getattr(self, key)
+        if self._elements[key].item_spec.masked and isinstance(pv, str):
+            pv = self.mask_value(pv)
+        return pv
+
     def print(self):
         print("Node Configuration ({})".format(self.__class__.__name__))
         for element in self._elements.keys():
-            print("    {:>30}: {}".format(element, getattr(self, element)))
+            print("    {:>30}: {}".format(element, self.scrubbed_value(element)))
 
 
 class ConfigMixin(object):
