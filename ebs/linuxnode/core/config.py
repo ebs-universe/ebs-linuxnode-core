@@ -119,7 +119,7 @@ class IoTNodeConfig(object):
         if element == '_elements' or element not in self._elements.keys():
             return super(IoTNodeConfig, self).__setattr__(element, value)
         section, item, item_spec = self._elements[element]
-        item_type, fallback, read_only = item_spec
+        item_type, fallback, read_only, masked = item_spec
 
         if read_only:
             raise AttributeError("{} element '{}' is read_only. Cannot write."
