@@ -141,7 +141,7 @@ class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
 
     @bg.setter
     def bg(self, value):
-        self.log.info("Setting background to {value}", value=value)
+        self.log.debug(f"Setting background to {value}", value=value)
         bgcolor, callback, duration = None, None, None
         if isinstance(value, BackgroundSpec):
             value, bgcolor, callback, duration = value
