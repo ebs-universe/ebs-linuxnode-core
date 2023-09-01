@@ -160,12 +160,14 @@ class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
         if not provider:
             self.log.warn("Provider not found for background {}".format(value))
             value = self.config.background
+            self._bg_signal_fallback(with_reset=False)
             provider = self._get_provider(value)
             self.log.warn("Trying to use {} instead.".format(value))
 
         if not provider:
             self.log.warn("Unable to display config background. Clearing from config.")
             self.config.remove('background')
+            self._bg_signal_fallback(with_reset=True)
             value = self.config.background
             provider = self._get_provider(value)
 
@@ -179,6 +181,9 @@ class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
         )
 
         return True
+
+    def _bg_signal_fallback(self, with_reset=False):
+        pass
 
     def bg_pause(self):
         self.log.debug("Pausing Background")
