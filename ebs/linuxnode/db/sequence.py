@@ -28,7 +28,7 @@ class GenericSequencePersistenceManager(object):
     def log(self):
         if not self._log:
             self._log = logger.Logger(
-                namespace="{0}.pm".format(self.__class__.__name__),
+                namespace="{0}.pm".format(self._db_name),
                 source=self
             )
         return self._log
@@ -103,8 +103,8 @@ class GenericSequencePersistenceManager(object):
         finally:
             session.close()
         self._items = _items
-        self.log.info("Got {} Items from DB '{}'."
-                      "".format(len(self._items), self._db_name))
+        self.log.debug("Got {} Items from DB '{}'."
+                       "".format(len(self._items), self._db_name))
 
     def db_get_resources(self, session, seq=None):
         q = session.query(self.db_model)
