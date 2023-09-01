@@ -111,6 +111,9 @@ class BackgroundCoreMixin(ResourceManagerMixin, NodeLoggingMixin, BaseMixin):
                 break
         return provider
 
+    def render_bg_providers(self):
+        return [str(x.__class__.__name__) for x in self._bg_providers]
+
     def background_set(self, target):
         if not target:
             target = None
