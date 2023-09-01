@@ -240,18 +240,40 @@ class ResourceManager(object):
 
     def _fetch(self, resource, semaphore=None):
         self._active_downloads.append(resource.filename)
-        self.log.debug("Requesting download of {filename}", filename=resource.filename)
+        self.log.info("Requesting download of {filename}", filename=resource.filename)
         d = self._node.http_download(resource.url, resource.cache_path, semaphore=semaphore)
 
         # Update timestamps for the downloaded file to reflect start of
         # download instead of end. Consider if this is wise.
         def _dl_finalize(r, times, _):
+            self.log.debug("Correcting timestamps on downloaded file {filename}",
+                           filename=r.filename)
             with open(r.cache_path, 'a'):
                 os.utime(r.cache_path, times)
 
         d.addCallback(
             partial(_dl_finalize, resource, (time.time(), time.time()))
         )
+
+        def _report_download_success(r, _):
+            self.log.debug("Reporting download success for {filename}", filename=r.filename)
+            self._node.rm_download_success_reporter(filename=r.filename,
+                                                    timestamp=datetime.utcnow().isoformat())
+
+        if self._node.rm_download_success_reporter:
+            self.log.debug("Installing success reporter callback for {filename}",
+                           filename=resource.filename)
+            d.addCallback(partial(_report_download_success, resource))
+
+        def _report_download_failure(r, _):
+            self.log.debug("Reporting download failure for {filename}", filename=r.filename)
+            self._node.rm_download_failure_reporter(filename=r.filename,
+                                                    timestamp=datetime.utcnow().isoformat())
+
+        if self._node.rm_download_success_reporter:
+            self.log.debug("Installing failure reporter callback for {filename}",
+                           filename=resource.filename)
+            d.addErrback(partial(_report_download_failure, resource))
 
         def _vacate_download(maybe_failure):
             self._active_downloads.remove(resource.filename)
@@ -315,6 +337,11 @@ class CachingResourceManager(ResourceManager):
 
     def cache_remove(self, filename):
         size = self.cache_file_size(filename)
+        if self._node.rm_cache_eviction_reporter:
+            self.log.debug("Reporting cache eviction of {filename}", filename=filename)
+            self._node.rm_cache_eviction_reporter(filename=filename,
+                                                  timestamp=datetime.utcnow().isoformat())
+
         # self.log.debug("Removing {filename} of size {size} from cache",
         #                filename=filename, size=size)
         try:
@@ -526,3 +553,18 @@ class ResourceManagerMixin(HttpClientMixin):
     @property
     def cache_trim_exclusions(self):
         return []
+
+    @property
+    def rm_download_success_reporter(self):
+        if hasattr(self, '_rm_download_success_reporter'):
+            return self._rm_download_success_reporter
+
+    @property
+    def rm_download_failure_reporter(self):
+        if hasattr(self, '_rm_download_failure_reporter'):
+            return self._rm_download_failure_reporter
+
+    @property
+    def rm_cache_eviction_reporter(self):
+        if hasattr(self, '_rm_cache_eviction_reporter'):
+            return self._rm_cache_eviction_reporter
