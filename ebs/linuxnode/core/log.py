@@ -35,7 +35,7 @@ class NodeLoggingMixin(ConfigMixin, BaseMixin):
     def install(self):
         super(NodeLoggingMixin, self).install()
         _elements = {
-            'debug': ElementSpec('debug', 'debug', ItemSpec(bool, fallback=False)),
+            'debug': ElementSpec('debug', 'debug', ItemSpec(bool, fallback=False, read_only=False)),
         }
 
         for element, element_spec in _elements.items():
