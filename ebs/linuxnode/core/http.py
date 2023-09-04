@@ -305,7 +305,8 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
 
     def _http_error_handler(self, failure, url=None):
         self.log.failure("HTTP Connection Failure to {url} : ", failure=failure, url=url)
-        failure.trap(HTTPError, DNSLookupError, ResponseNeverReceived, SchemeNotSupported)
+        failure.trap(HTTPError, DNSLookupError, ResponseNeverReceived,
+                     SchemeNotSupported, ConnectionRefusedError)
         if isinstance(failure.value, HTTPError):
             self.log.warn(
                 "Encountered error {e} while trying to {method} {url}",
@@ -331,6 +332,11 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
             self.log.warn(
                 "Got an unsupported scheme for {url}. Check your URL and "
                 "try again.", url=url
+            )
+        if isinstance(failure.value, ConnectionRefusedError):
+            self.log.warn(
+                "Server seems to be unavailable for {url}. Check URL and "
+                "server readiness and try again", url=url
             )
         return failure
 
