@@ -25,6 +25,7 @@ from twisted.internet.error import TimeoutError
 from twisted.internet.error import DNSLookupError
 from twisted.internet.error import ConnectError
 from twisted.internet.error import NoRouteError
+from twisted.internet.error import ConnectionRefusedError
 from twisted.web.client import ResponseNeverReceived
 from twisted.web.client import ResponseFailed
 from twisted.web.error import SchemeNotSupported
@@ -43,7 +44,7 @@ class HTTPError(Exception):
         self.response = response
 
 
-_http_errors = (HTTPError, DNSLookupError, NoRouteError,
+_http_errors = (HTTPError, DNSLookupError, NoRouteError, ConnectionRefusedError,
                 TimeoutError, ConnectError, ResponseNeverReceived)
 
 
