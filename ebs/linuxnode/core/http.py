@@ -43,6 +43,9 @@ class HTTPError(Exception):
     def __init__(self, response):
         self.response = response
 
+    def __repr__(self):
+        return f"HTTP Response : {self.response}"
+
 
 _http_errors = (HTTPError, DNSLookupError, NoRouteError, ConnectionRefusedError,
                 TimeoutError, ConnectError, ResponseNeverReceived)
