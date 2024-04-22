@@ -181,20 +181,22 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
         return url
 
     @staticmethod
-    def _strip_auth(kwargs):
-        if 'headers' not in kwargs.keys():
-            return kwargs
-        if b'Authorization' in kwargs['headers'].keys():
-            rv = copy.deepcopy(kwargs)
-            rv['headers'][b'Authorization'] = rv['headers'][b'Authorization'][:10] + b'...'
-            return rv
-        return kwargs
+    def _sanitize(kwargs):
+        response = {k: v for k, v in kwargs.items() if k not in {'_files'}}
+        if 'headers' not in response.keys():
+            return response
+        if b'Authorization' in response['headers'].keys():
+            new_headers = copy.deepcopy(response['headers'])
+            new_headers[b'Authorization'] = new_headers[b'Authorization'][:10] + b'...'
+            response['headers'] = new_headers
+            return response
+        return response
 
     def http_get(self, url, **kwargs):
         self.log.debug("Executing HTTP GET Request\n"
                        " to URL {url}\n"
                        " with kwargs {kwargs}",
-                       url=url, kwargs=self._strip_auth(kwargs))
+                       url=url, kwargs=self._sanitize(kwargs))
         deferred_response = self.http_semaphore.run(
             self.http_client.get, url, **kwargs
         )
@@ -211,7 +213,7 @@ class HttpClientMixin(NodeBusyMixin, NodeLoggingMixin, BaseMixin):
         self.log.debug("Executing HTTP Post Request\n"
                        " to URL {url}\n"
                        " with kwargs {kwargs}",
-                       url=url, kwargs=self._strip_auth(kwargs))
+                       url=url, kwargs=self._sanitize(kwargs))
         deferred_response = self.http_semaphore.run(
             self.http_client.post, url, **kwargs
         )

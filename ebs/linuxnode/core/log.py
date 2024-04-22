@@ -4,6 +4,7 @@ import os
 import io
 import sys
 import time
+import zipfile
 from twisted import logger
 from twisted.logger import LogLevel
 from twisted.logger import LogLevelFilterPredicate
@@ -101,6 +102,21 @@ class NodeLoggingMixin(ConfigMixin, BaseMixin):
     def log_dir(self):
         os.makedirs(user_log_dir(self.appname), exist_ok=True)
         return user_log_dir(self.appname)
+
+    def log_build_package(self, out_path=None):
+        if not out_path:
+            ctime = datetime.now().strftime("%Y%m%d%H%M%S")
+            out_path = os.path.join('/tmp', f'{self.id}.{ctime}.logs.zip')
+
+        with zipfile.ZipFile(out_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+            for root, dirs, files in os.walk(self.log_dir):
+                for file_or_dir in files + dirs:
+                    zip_file.write(
+                        os.path.join(root, file_or_dir),
+                        os.path.relpath(os.path.join(root, file_or_dir), self.log_dir)
+                    )
+
+        return out_path
 
     def exim_install(self):
         super(NodeLoggingMixin, self).exim_install()
