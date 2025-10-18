@@ -10,6 +10,7 @@ from .shell import BaseShellMixin
 from .http import HttpClientMixin
 from .resources import ResourceManagerMixin
 from .background import BackgroundCoreMixin
+from .tempfs import TempFSMixin
 
 
 class BaseIoTNode(BackgroundCoreMixin,
@@ -17,6 +18,7 @@ class BaseIoTNode(BackgroundCoreMixin,
                   HttpClientMixin,
                   BaseShellMixin,
                   NodeBusyMixin,
+                  TempFSMixin,
                   NodeLoggingMixin,
                   NodeIDMixin):
     _has_gui = False

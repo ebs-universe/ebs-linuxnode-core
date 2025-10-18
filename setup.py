@@ -15,6 +15,7 @@ _requires = [
     # System
     'ifcfg',
     'psutil',
+    'memory_tempfile',
 
     # HTTP Client
     'treq',
