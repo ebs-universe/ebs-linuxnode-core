@@ -8,7 +8,10 @@
 
 
 import os
+import shutil
 import pkg_resources
+
+from pathlib import Path
 from six.moves.configparser import ConfigParser
 from collections import namedtuple
 from appdirs import user_config_dir
@@ -36,6 +39,48 @@ class IoTNodeConfig(object):
     @property
     def appname(self):
         return self._appname
+
+    def config_dir(self):
+        """
+        Return the application's configuration directory.
+
+        This is the same directory used by IoTNodeConfig for
+        config.ini.
+        """
+        path = Path(user_config_dir(self.appname))
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def ensure_app_resource(self, filename):
+        """
+        Return the user-editable copy of a packaged resource.
+
+        On first execution the packaged resource is copied into the
+        application's configuration directory.
+
+        Subsequent executions always use the copy from the
+        configuration directory.
+
+        Deleting the copied file restores the packaged default on the
+        next application start.
+        """
+
+        destination = self.config_dir() / filename
+
+        if destination.exists():
+            return destination
+
+        destination.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        shutil.copy2(
+            self.get_path(f"resources/{filename}"),
+            destination
+        )
+
+        return destination
 
     @property
     def _config_file(self):

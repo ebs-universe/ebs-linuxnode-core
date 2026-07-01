@@ -19,6 +19,7 @@ _requires = [
 
     # HTTP Client
     'treq',
+    # 'standard-pkg-resources',
 ]
 
 setuptools.setup(
